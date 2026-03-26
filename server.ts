@@ -35,7 +35,7 @@ async function startServer() {
   const parkingRoutes = (await import("./src/lib/api-parking.js")).default;
 
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
   app.use(express.json());
 
