@@ -3,7 +3,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm ci",
   "framework": "vite",
-  "nodeVersion": "22.x",
   "env": {
     "VITE_SUPABASE_URL": "@vite_supabase_url",
     "VITE_SUPABASE_ANON_KEY": "@vite_supabase_anon_key",
