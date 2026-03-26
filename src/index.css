@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  /* Backgrounds */
+  --color-bg-base: #F8F9FA;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-elevated: #F1F3F5;
+  --color-bg-overlay: rgba(255, 255, 255, 0.9);
+
+  /* Brand */
+  --color-primary: #2563EB;
+  --color-primary-dim: rgba(37, 99, 235, 0.08);
+  --color-primary-glow: rgba(37, 99, 235, 0.2);
+  --color-accent: #4F46E5;
+
+  /* Semantic */
+  --color-green: #10B981;
+  --color-green-dim: rgba(16, 185, 129, 0.08);
+  --color-amber: #F59E0B;
+  --color-amber-dim: rgba(245, 158, 11, 0.08);
+  --color-red: #EF4444;
+  --color-red-dim: rgba(239, 68, 68, 0.08);
+
+  /* Text */
+  --color-text-1: #111827;
+  --color-text-2: #4B5563;
+  --color-text-3: #9CA3AF;
+
+  /* Borders */
+  --color-border: #E5E7EB;
+  --color-border-mid: #D1D5DB;
+  --color-border-bright: #9CA3AF;
+
+  /* Fonts */
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-bg-base text-text-1 font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+}
+
+/* Animations from Part 34 */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes pulse {
+  70% { box-shadow: 0 0 0 8px rgba(16, 217, 160, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 217, 160, 0); }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.page-enter { animation: fadeUp 0.25s ease forwards; }
+.live-dot {
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 0 0 rgba(16, 217, 160, 0.5);
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--color-bg-elevated) 25%, var(--color-bg-card) 50%, var(--color-bg-elevated) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-bg-elevated);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-bright);
+}

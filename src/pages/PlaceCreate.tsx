@@ -1,0 +1,238 @@
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { 
+  Plus, 
+  ArrowLeft, 
+  Save, 
+  MapPin, 
+  Building2,
+  CheckCircle2,
+  Info
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { cn } from '../lib/utils';
+import { toast } from 'sonner';
+import { apiFetch } from '../lib/api-client';
+
+const placeSchema = z.object({
+  name: z.string().min(2, 'Place name must be at least 2 characters'),
+  address: z.string().min(5, 'Address must be at least 5 characters'),
+  description: z.string().optional(),
+  status: z.enum(['active', 'inactive']),
+});
+
+type PlaceFormValues = z.infer<typeof placeSchema>;
+
+export default function PlaceCreate() {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<PlaceFormValues>({
+    resolver: zodResolver(placeSchema),
+    defaultValues: {
+      status: 'active',
+    }
+  });
+
+  const selectedStatus = watch('status');
+
+  const onSubmit = async (data: PlaceFormValues) => {
+    setIsLoading(true);
+    try {
+      await apiFetch('/api/places', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: data.name,
+          description: data.address + (data.description ? ` - ${data.description}` : ''),
+          status: data.status,
+        }),
+      });
+
+      toast.success('Place created successfully', {
+        description: `${data.name} has been added to the system.`,
+        icon: <CheckCircle2 className="text-green" size={20} />
+      });
+      navigate('/parking/places');
+    } catch (error: any) {
+      console.error('Error creating place:', error);
+      toast.error('Failed to create place', {
+        description: error.message || 'An unknown error occurred'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8 page-enter">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/parking/places')}
+            className="p-3 bg-bg-card border border-border rounded-xl text-text-3 hover:text-primary transition-all hover:scale-105"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h2 className="text-3xl font-display font-black text-text-1 tracking-tight">Add New Place</h2>
+            <p className="text-text-3">Register a new parking location or facility</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <form onSubmit={handleSubmit(onSubmit)} className="bg-bg-card border border-border rounded-2xl overflow-hidden shadow-xl">
+            <div className="p-8 space-y-8">
+              <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-3">Place Name</label>
+                  <div className="relative">
+                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-text-3" size={18} />
+                    <input 
+                      {...register('name')}
+                      type="text"
+                      placeholder="e.g. Grand Central Mall"
+                      className={cn(
+                        "w-full pl-12 pr-4 py-3.5 bg-bg-base border rounded-xl text-text-1 focus:outline-none transition-all",
+                        errors.name ? "border-red focus:border-red" : "border-border focus:border-primary"
+                      )}
+                    />
+                  </div>
+                  {errors.name && <p className="text-xs text-red font-medium">{errors.name.message}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-3">Full Address</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-4 text-text-3" size={18} />
+                    <textarea 
+                      {...register('address')}
+                      placeholder="Enter the complete physical address..."
+                      rows={3}
+                      className={cn(
+                        "w-full pl-12 pr-4 py-3.5 bg-bg-base border rounded-xl text-text-1 focus:outline-none transition-all resize-none",
+                        errors.address ? "border-red focus:border-red" : "border-border focus:border-primary"
+                      )}
+                    />
+                  </div>
+                  {errors.address && <p className="text-xs text-red font-medium">{errors.address.message}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-3">Description (Optional)</label>
+                  <textarea 
+                    {...register('description')}
+                    placeholder="Additional details about the location..."
+                    rows={2}
+                    className="w-full px-4 py-3.5 bg-bg-base border border-border rounded-xl text-text-1 focus:outline-none focus:border-primary transition-all resize-none"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-3">Initial Status</label>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setValue('status', 'active')}
+                      className={cn(
+                        "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 transition-all",
+                        selectedStatus === 'active' 
+                          ? "bg-green/10 border-green text-green shadow-[0_0_15px_rgba(34,197,94,0.2)]" 
+                          : "bg-bg-base border-border text-text-3 hover:text-text-2"
+                      )}
+                    >
+                      <div className={cn("w-2 h-2 rounded-full", selectedStatus === 'active' ? "bg-green" : "bg-text-3")} />
+                      Active
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setValue('status', 'inactive')}
+                      className={cn(
+                        "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 transition-all",
+                        selectedStatus === 'inactive' 
+                          ? "bg-red/10 border-red text-red shadow-[0_0_15px_rgba(239,68,68,0.2)]" 
+                          : "bg-bg-base border-border text-text-3 hover:text-text-2"
+                      )}
+                    >
+                      <div className={cn("w-2 h-2 rounded-full", selectedStatus === 'inactive' ? "bg-red" : "bg-text-3")} />
+                      Inactive
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 bg-bg-surface border-t border-border flex items-center justify-end gap-4">
+              <button 
+                type="button"
+                onClick={() => navigate('/parking/places')}
+                className="px-6 py-3 text-text-2 font-bold hover:text-text-1 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save size={20} />
+                    Save Place
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div className="space-y-6">
+          <div className="bg-bg-card border border-border rounded-2xl p-6 space-y-4">
+            <h4 className="font-display font-bold text-text-1 flex items-center gap-2">
+              <Info size={18} className="text-primary" />
+              Place Information
+            </h4>
+            <p className="text-sm text-text-2 leading-relaxed">
+              Registering a place is the first step in setting up your parking infrastructure. Once a place is created, you can add:
+            </p>
+            <ul className="space-y-3 text-sm text-text-2">
+              <li className="flex gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                Floors and Levels
+              </li>
+              <li className="flex gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                Vehicle Categories
+              </li>
+              <li className="flex gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                Specific Parking Slots
+              </li>
+              <li className="flex gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                Custom Tariffs
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-bg-card border border-border rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-accent-dim rounded-xl flex items-center justify-center text-accent">
+                <MapPin size={20} />
+              </div>
+              <h4 className="font-display font-bold text-text-1">Location Precision</h4>
+            </div>
+            <p className="text-sm text-text-2 leading-relaxed">
+              Ensure the address is accurate as it will be printed on customer receipts and used for geographical reporting.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

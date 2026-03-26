@@ -1,0 +1,5 @@
+{
+  "name": "ParkNova — Premium Parking Management",
+  "description": "A dark luxury parking management system with real-time tracking, automated billing, and advanced reporting.",
+  "requestFramePermissions": ["camera"]
+}
